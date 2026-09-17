@@ -1,1 +1,320 @@
-itt
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Batsányi Digitális Évkönyv 1955–2026</title>
+
+<link href="httpsivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css
+
+<style>
+:root{
+    --primary:#0d3b66;
+    --secondary:#d4af37;
+}
+
+body{
+    background:#f4f6f8;
+}
+
+.hero{
+    background:linear-gradient(135deg,var(--primary),#1f5d96);
+    color:white;
+    padding:60px 20px;
+}
+
+.stat-card{
+    border-radius:15px;
+    transition:.25s;
+}
+
+.stat-card:hover{
+    transform:translateY(-5px);
+}
+
+.timeline{
+    max-height:500px;
+    overflow:auto;
+}
+
+.darkmode{
+    background:#121212 !important;
+    color:#eee !important;
+}
+
+.darkmode .card{
+    background:#1f1f1f;
+    color:white;
+}
+
+.table-container{
+    max-height:600px;
+    overflow:auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="hero text-center">
+    <h1>Batsányi Digitális Évkönyv</h1>
+    <h3>1955–2026</h3>
+    <p>Végzett tanulók, osztályok és osztályfőnökök digitális archívuma</p>
+
+    <button class="btn btn-warning" onclick="toggleDarkMode()">
+        🌙 Sötét mód
+    </button>
+</div>
+
+<div class="container mt-4">
+
+<div class="row g-3 mb-4">
+
+<div class="col-md-3">
+<div class="card stat-card p-3 text-center">
+<h3 id="osszesTanulo">-</h3>
+<p>Tanuló</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card stat-card p-3 text-center">
+<h3 id="osszesOsztaly">-</h3>
+<p>Osztály</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card stat-card p-3 text-center">
+<h3 id="osszesEv">-</h3>
+<p>Év</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card stat-card p-3 text-center">
+<h3 id="osszesOsztalyfonok">-</h3>
+<p>Osztályfőnök</p>
+</div>
+</div>
+
+</div>
+
+<div class="card p-3 mb-4">
+
+<h3>🔍 Keresés</h3>
+
+<div class="row g-2">
+
+<div class="col-md-3">
+<input id="searchName" class="form-control" placeholder="Név">
+</div>
+
+<div class="col-md-2">
+<input id="searchYear" class="form-control" placeholder="Év">
+</div>
+
+<div class="col-md-2">
+<input id="searchClass" class="form-control" placeholder="Osztály">
+</div>
+
+<div class="col-md-3">
+<input id="searchTeacher" class="form-control" placeholder="Osztályfőnök">
+</div>
+
+<div class="col-md-2">
+<button class="btn btn-primary w-100" onclick="searchData()">
+Keresés
+</button>
+</div>
+
+</div>
+</div>
+
+<div class="card p-3 mb-4">
+
+<h3>Találatok</h3>
+
+<div class="table-container">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>Év</th>
+<th>Osztály</th>
+<th>Osztályfőnök</th>
+<th>Név</th>
+<th>Tagozat</th>
+</tr>
+</thead>
+
+<tbody id="results">
+</tbody>
+
+</table>
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-6">
+
+<div class="card p-3 mb-4">
+
+<h3>🏛 Igazgatók</h3>
+
+<ul id="directors"></ul>
+
+</div>
+
+</div>
+
+<div class="col-md-6">
+
+<div class="card p-3 mb-4">
+
+<h3>📅 Évfolyam-idővonal</h3>
+
+<div id="timeline" class="timeline"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card p-3">
+
+<h3>📊 Leggyakoribb vezetéknevek</h3>
+
+<ul id="topNames"></ul>
+
+</div>
+
+</div>
+
+<script>
+
+let adatbazis=[];
+let igazgatok=[];
+let stats={};
+
+Promise.all([
+fetch('adatbazis.json').then(r=>r.json()),
+fetch('igazgatok.json').then(r=>r.json()),
+fetch('statistics.json').then(r=>r.json())
+])
+.then(([db,dir,st])=>{
+
+adatbazis=db;
+igazgatok=dir;
+stats=st;
+
+renderStats();
+renderDirectors();
+renderTimeline();
+searchData();
+
+});
+
+function renderStats(){
+
+document.getElementById("osszesTanulo").innerText=stats.osszes_tanulo;
+document.getElementById("osszesOsztaly").innerText=stats.osszes_osztaly;
+document.getElementById("osszesEv").innerText=stats.osszes_ev;
+document.getElementById("osszesOsztalyfonok").innerText=stats.osszes_osztalyfonok;
+
+let names="";
+
+stats.leggyakoribb_vezeteknevek.forEach(n=>{
+names+=`<li>${n.nev} (${n.db})</li>`;
+});
+
+document.getElementById("topNames").innerHTML=names;
+
+}
+
+function renderDirectors(){
+
+let html="";
+
+igazgatok.forEach(d=>{
+
+html+=`
+<li>
+<b>${d.nev}</b><br>
+${d.tol} - ${d.ig}
+</li>
+`;
+
+});
+
+document.getElementById("directors").innerHTML=html;
+
+}
+
+function renderTimeline(){
+
+let html="";
+
+stats.evek.forEach(ev=>{
+
+html+=`
+<div class="border-bottom py-1">
+${ev}
+</div>
+`;
+
+});
+
+document.getElementById("timeline").innerHTML=html;
+
+}
+
+function searchData(){
+
+const nev=document.getElementById("searchName").value.toLowerCase();
+const ev=document.getElementById("searchYear").value;
+const osztaly=document.getElementById("searchClass").value.toLowerCase();
+const ofo=document.getElementById("searchTeacher").value.toLowerCase();
+
+let result=adatbazis.filter(r=>{
+
+return (
+(!nev || r.tanulo.toLowerCase().includes(nev))
+&& (!ev || r.ev==ev)
+&& (!osztaly || r.osztaly.toLowerCase().includes(osztaly))
+&& (!ofo || (r.osztalyfonok||"").toLowerCase().includes(ofo))
+);
+
+});
+
+let html="";
+
+result.slice(0,1000).forEach(r=>{
+
+html+=`
+<tr>
+<td>${r.ev}</td>
+<td>${r.osztaly}</td>
+<td>${r.osztalyfonok ?? "-"}</td>
+<td>${r.tanulo}</td>
+<td>${r.tagozat}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("results").innerHTML=html;
+
+}
+
+function toggleDarkMode(){
+document.body.classList.toggle("darkmode");
+}
+
+</script>
+
+</body>
+</html>
