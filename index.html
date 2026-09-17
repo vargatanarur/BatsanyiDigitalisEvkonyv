@@ -85,28 +85,40 @@ box-shadow:
 
 <body>
 <div class="main-wrapper">
-<section class="hero text-center">
-
-<h1 class="display-4 fw-bold">
+<section class="hero">
+<div class="container">
+<div class="row align-items-center">
+<div class="col-lg-6 text-center">
+<h1 class="display-2 fw-bold">
 Batsányi Digitális Évkönyv
 </h1>
+<h2>1955–2026</h2>
+<p class="lead">
+7450 végzett diák •
+261 osztály •
+73 évfolyam
+</p>
+<div class="mt-4">
+<input
+id="name"
+class="form-control form-control-lg"
+placeholder="Keresés név szerint...">
+</div>
+</div>
+<div class="col-lg-6 text-center">
 <img
 src="batsanyi.png"
+
 class="hero-img"
 alt="Batsányi">
-<h3>1955–2026</h3>
-
-<p class="lead">
-Végzett tanulók, osztályok és osztályfőnökök archívuma
-</p>
-
+</div>
+</div>
+</div>
+</section>
 <button class="btn btn-warning"
 onclick="toggleDark()">
 🌙 Sötét mód
 </button>
-
-</section>
-
 <div class="container py-4">
 
 <div class="row g-3 mb-4">
